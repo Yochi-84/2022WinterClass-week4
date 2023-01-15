@@ -6,7 +6,7 @@ export default {
   },
   props: ['text'],
   template: `
-  <div class="modal" tabindex="-1">
+  <div class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header bg-danger">

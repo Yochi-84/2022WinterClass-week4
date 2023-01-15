@@ -18,6 +18,10 @@
       rel="stylesheet"
     />
     <style>
+      .table {
+        --bs-table-striped-bg: #fffde6;
+      }
+
       body {
         font-family: 'Noto Sans TC', sans-serif;
       }
@@ -46,7 +50,9 @@
                 <th class="fw-normal">產品名稱</th>
                 <th class="fw-normal">原價</th>
                 <th class="fw-normal">售價</th>
-                <th class="fw-normal" v-if="products[0]?.number !== undefined">數量</th>
+                <th class="fw-normal" v-if="products[0]?.number !== undefined">
+                  數量
+                </th>
                 <th class="fw-normal text-center">是否啟用</th>
                 <th class="fw-normal text-center">編輯</th>
               </tr>
@@ -61,7 +67,9 @@
                 <td>{{ product.title }}</td>
                 <td>NT$ {{ product.origin_price }}</td>
                 <td>NT$ {{ product.price }}</td>
-                <td v-if="product.number !== undefined">{{product.number? product.number: 0}} {{product.unit}}</td>
+                <td v-if="product.number !== undefined">
+                  {{product.number? product.number: 0}} {{product.unit}}
+                </td>
                 <td
                   class="text-center"
                   :class="[product.is_enabled ? 'text-success' : 'text-danger']"
@@ -92,7 +100,7 @@
         </div>
       </div>
       <!-- 分頁 -->
-      <pagination :pages="page" @change-page="changePage" @previous-page="previousPage" @next-page="nextPage"></pagination>
+      <pagination :pages="page" @change-page="changePage"></pagination>
 
       <!-- 新增 Modal -->
       <div
@@ -118,26 +126,87 @@
                 <div class="row">
                   <div class="col-5 border-end">
                     <div>
-                      <label for="imageUrl" class="form-label">產品圖片:</label>
-                      <input
-                        type="text"
-                        id="imageUrl"
-                        class="form-control mb-2"
-                        v-model="newProduct.imageUrl"
-                        placeholder="圖片網址"
-                      />
-                      <div class="ratio ratio-1x1">
-                        <img
-                          :src="newProduct.imageUrl"
-                          alt="主圖片"
-                          v-show="newProduct.imageUrl"
-                          class="object-cover"
+                      <label for="imageUrl" class="form-label me-4"
+                        >產品圖片:</label
+                      >
+                      <div
+                        class="btn-group mb-2"
+                        role="group"
+                        aria-label="Basic radio toggle button group"
+                      >
+                        <input
+                          type="radio"
+                          class="btn-check"
+                          name="imgMethod"
+                          id="imgMethod_url"
+                          v-model="imgMethod"
+                          value="url"
+                          autocomplete="off"
+                          checked
                         />
+                        <label
+                          class="btn btn-outline-warning"
+                          for="imgMethod_url"
+                          >圖片網址</label
+                        >
+
+                        <input
+                          type="radio"
+                          class="btn-check"
+                          name="imgMethod"
+                          id="imgMethod_upload"
+                          v-model="imgMethod"
+                          value="upload"
+                          autocomplete="off"
+                        />
+                        <label
+                          class="btn btn-outline-warning"
+                          for="imgMethod_upload"
+                          >上傳圖片</label
+                        >
                       </div>
+                      <keep-alive>
+                        <div v-if="imgMethod === 'url'">
+                          <input
+                            type="text"
+                            id="imageUrl"
+                            class="form-control mb-2"
+                            v-model="newProduct.imageUrl"
+                            placeholder="圖片網址"
+                          />
+                          <div class="ratio ratio-1x1">
+                            <img
+                              :src="newProduct.imageUrl"
+                              alt="主圖片"
+                              v-show="newProduct.imageUrl"
+                              class="object-cover"
+                            />
+                          </div>
+                        </div>
+                        <div v-else>
+                          <div class="mb-3">
+                            <input
+                              class="form-control"
+                              type="file"
+                              id="imgUpload"
+                              accept="image/*"
+                              @change="showUploadImg"
+                            />
+                          </div>
+                          <div class="ratio ratio-1x1">
+                            <img
+                              :src="tempSrc.blob_src"
+                              alt="主圖片"
+                              v-show="tempSrc.blob_src"
+                              class="object-cover"
+                            />
+                          </div>
+                        </div>
+                      </keep-alive>
                     </div>
                   </div>
                   <div class="col-7 row">
-                    <div :class="[newProduct.number != undefined ? 'col-6': '']">
+                    <div class="col-6">
                       <label for="title" class="form-label">產品名稱:</label>
                       <input
                         type="text"
@@ -147,7 +216,7 @@
                         placeholder="請輸入產品名稱"
                       />
                     </div>
-                    <div class="col-6" v-if="newProduct.number != undefined">
+                    <div class="col-6">
                       <label for="number" class="form-label">數量:</label>
                       <input
                         type="text"
@@ -243,12 +312,7 @@
               >
                 取消
               </button>
-              <button
-                type="button"
-                class="btn btn-primary"
-                @click="addProduct"
-                data-bs-dismiss="modal"
-              >
+              <button type="button" class="btn btn-primary" @click="addProduct">
                 確認新增
               </button>
             </div>
@@ -301,7 +365,9 @@
                     </div>
                   </div>
                   <div class="col-7 row">
-                    <div :class="[editingProduct.number != undefined ? 'col-6': '']">
+                    <div
+                      :class="[editingProduct.number != undefined ? 'col-6': '']"
+                    >
                       <label for="editing_title" class="form-label"
                         >產品名稱:</label
                       >
@@ -313,7 +379,10 @@
                         placeholder="請輸入產品名稱"
                       />
                     </div>
-                    <div class="col-6" v-if="editingProduct.number != undefined">
+                    <div
+                      class="col-6"
+                      v-if="editingProduct.number != undefined"
+                    >
                       <label for="number" class="form-label">數量:</label>
                       <input
                         type="text"
@@ -432,7 +501,10 @@
       </div>
 
       <!-- 訊息 Modal -->
-      <msg-modal :text="modalText" id="msgModal"></msg-modal>
+      <msg-modal :text="msgText" id="msgModal"></msg-modal>
+
+      <!-- 確認 Modal -->
+      <!-- <confirm-modal :text="confirmText" id="confirmModal"></confirm-modal> -->
     </div>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>

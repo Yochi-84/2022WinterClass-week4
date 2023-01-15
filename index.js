@@ -8,7 +8,7 @@ const app = Vue.createApp({
       status: false,
       username: '',
       password: '',
-      modalText: '',
+      msgText: '',
     };
   },
   components: {
@@ -17,7 +17,7 @@ const app = Vue.createApp({
   methods: {
     checkUserInfo() {
       if (this.username === "" || this.password === "") {
-        this.modalText = "帳號密碼不可為空";
+        this.msgText = "帳號密碼不可為空";
         msg_modal.show();
       } else {
         axios
@@ -32,7 +32,7 @@ const app = Vue.createApp({
             window.location.href = './backend.html';
           })
           .catch((err) => {
-            this.modalText = err.response.data.message;
+            this.msgText = err.response.data.message;
             msg_modal.show();
           });
       }
