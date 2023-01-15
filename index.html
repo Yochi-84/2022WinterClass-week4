@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登入</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css"
+      integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA=="
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-image: url('https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        font-family: 'Noto Sans TC', sans-serif;
+      }
+
+      @media screen and (min-width: 800px) {
+        body {
+          background-image: url('https://images.unsplash.com/photo-1559235038-1b0fadf76f78?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container" style="height: 100vh">
+        <div class="row justify-content-center align-items-center h-100">
+          <div class="col-md-8 col-lg-6">
+            <form action="" class="p-4">
+              <legend class="fw-bold display-4 text-center text-white">
+                登入
+              </legend>
+              <label for="username" class="form-label fs-5 mb-2">信箱:</label>
+              <input
+                type="email"
+                id="username"
+                class="form-control mb-4"
+                v-model="username"
+              />
+              <label for="password" class="form-label fs-5 mb-2">密碼:</label>
+              <input
+                type="password"
+                id="password"
+                class="form-control mb-5"
+                v-model="password"
+              />
+              <button
+                type="button"
+                class="btn btn-primary btn-lg w-100"
+                @click="checkUserInfo"
+              >
+                登入
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <msg-modal :text="modalText" id="msgModal"></msg-modal>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
+      integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.2/axios.min.js"
+      integrity="sha512-QTnb9BQkG4fBYIt9JGvYmxPpd6TBeKp6lsUrtiVQsrJ9sb33Bn9s0wMQO9qVBFbPX3xHRAsBHvXlcsrnJjExjg=="
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

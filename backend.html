@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>後台</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css"
+      integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA=="
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: 'Noto Sans TC', sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <div class="row my-4">
+        <div class="col-3 offset-9">
+          <button
+            class="btn btn-primary w-100"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#addModal"
+          >
+            新增產品
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <table class="table-hover table-striped table">
+            <thead>
+              <tr class="table-warning">
+                <th class="fw-normal">分類</th>
+                <th class="fw-normal">產品名稱</th>
+                <th class="fw-normal">原價</th>
+                <th class="fw-normal">售價</th>
+                <th class="fw-normal" v-if="products[0]?.number !== undefined">數量</th>
+                <th class="fw-normal text-center">是否啟用</th>
+                <th class="fw-normal text-center">編輯</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(product, index) in products"
+                :key="product.id"
+                class="align-middle"
+              >
+                <td>{{ product.category }}</td>
+                <td>{{ product.title }}</td>
+                <td>NT$ {{ product.origin_price }}</td>
+                <td>NT$ {{ product.price }}</td>
+                <td v-if="product.number !== undefined">{{product.number? product.number: 0}} {{product.unit}}</td>
+                <td
+                  class="text-center"
+                  :class="[product.is_enabled ? 'text-success' : 'text-danger']"
+                >
+                  {{ product.is_enabled ? "啟用": "未啟用" }}
+                </td>
+                <td class="text-center">
+                  <button
+                    class="btn btn-outline-primary me-2"
+                    type="button"
+                    @click="getProductInfo(index)"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editModal"
+                  >
+                    編輯
+                  </button>
+                  <button
+                    class="btn btn-danger"
+                    type="button"
+                    @click="deleteProduct(product.id)"
+                  >
+                    刪除
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- 分頁 -->
+      <pagination :pages="page" @change-page="changePage" @previous-page="previousPage" @next-page="nextPage"></pagination>
+
+      <!-- 新增 Modal -->
+      <div
+        class="modal fade"
+        id="addModal"
+        tabindex="-1"
+        aria-labelledby="addModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content">
+            <div class="modal-header bg-warning">
+              <h5 class="modal-title" id="addModalLabel">新增產品</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form class="container-fluid">
+                <div class="row">
+                  <div class="col-5 border-end">
+                    <div>
+                      <label for="imageUrl" class="form-label">產品圖片:</label>
+                      <input
+                        type="text"
+                        id="imageUrl"
+                        class="form-control mb-2"
+                        v-model="newProduct.imageUrl"
+                        placeholder="圖片網址"
+                      />
+                      <div class="ratio ratio-1x1">
+                        <img
+                          :src="newProduct.imageUrl"
+                          alt="主圖片"
+                          v-show="newProduct.imageUrl"
+                          class="object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-7 row">
+                    <div :class="[newProduct.number != undefined ? 'col-6': '']">
+                      <label for="title" class="form-label">產品名稱:</label>
+                      <input
+                        type="text"
+                        id="title"
+                        class="form-control mb-2"
+                        v-model="newProduct.title"
+                        placeholder="請輸入產品名稱"
+                      />
+                    </div>
+                    <div class="col-6" v-if="newProduct.number != undefined">
+                      <label for="number" class="form-label">數量:</label>
+                      <input
+                        type="text"
+                        id="number"
+                        class="form-control mb-2"
+                        v-model.number="newProduct.number"
+                        placeholder="請輸入產品數量"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="category" class="form-label">分類:</label>
+                      <input
+                        type="text"
+                        id="category"
+                        class="form-control mb-2"
+                        v-model="newProduct.category"
+                        placeholder="請輸入產品分類"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="unit" class="form-label">單位:</label>
+                      <input
+                        type="text"
+                        id="unit"
+                        class="form-control mb-2"
+                        v-model="newProduct.unit"
+                        placeholder="請輸入產品單位"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="origin_price" class="form-label">原價:</label>
+                      <input
+                        type="text"
+                        id="origin_price"
+                        class="form-control mb-2"
+                        v-model.number="newProduct.origin_price"
+                        placeholder="請輸入產品原價"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="price" class="form-label">售價:</label>
+                      <input
+                        type="text"
+                        id="price"
+                        class="form-control mb-2"
+                        v-model.number="newProduct.price"
+                        placeholder="請輸入產品售價"
+                      />
+                    </div>
+                    <div>
+                      <label for="description" class="form-label">描述:</label>
+                      <textarea
+                        type="text"
+                        id="description"
+                        class="form-control mb-2"
+                        v-model="newProduct.description"
+                        placeholder="請輸入產品描述"
+                      ></textarea>
+                    </div>
+                    <label for="content" class="form-label">說明:</label>
+                    <div>
+                      <textarea
+                        type="text"
+                        id="content"
+                        class="form-control mb-2"
+                        v-model="newProduct.content"
+                        placeholder="請輸入產品說明"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <div class="form-check form-switch">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          role="switch"
+                          id="is_enabled"
+                          @change="getEnabled"
+                        />
+                        <label class="form-check-label" for="is_enabled"
+                          >是否啟用</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                @click="addProduct"
+                data-bs-dismiss="modal"
+              >
+                確認新增
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 編輯 Modal -->
+      <div
+        class="modal fade"
+        id="editModal"
+        tabindex="-1"
+        aria-labelledby="editModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content">
+            <div class="modal-header bg-warning">
+              <h5 class="modal-title" id="editModalLabel">新增產品</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form class="container-fluid">
+                <div class="row">
+                  <div class="col-5 border-end">
+                    <div>
+                      <label for="editing_imageUrl" class="form-label"
+                        >產品圖片:</label
+                      >
+                      <input
+                        type="text"
+                        id="editing_imageUrl"
+                        class="form-control mb-2"
+                        v-model="editingProduct.imageUrl"
+                        placeholder="圖片網址"
+                      />
+                      <div class="ratio ratio-1x1">
+                        <img
+                          :src="editingProduct.imageUrl"
+                          alt="主圖片"
+                          v-show="editingProduct.imageUrl"
+                          class="object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-7 row">
+                    <div :class="[editingProduct.number != undefined ? 'col-6': '']">
+                      <label for="editing_title" class="form-label"
+                        >產品名稱:</label
+                      >
+                      <input
+                        type="text"
+                        id="editing_title"
+                        class="form-control mb-2"
+                        v-model="editingProduct.title"
+                        placeholder="請輸入產品名稱"
+                      />
+                    </div>
+                    <div class="col-6" v-if="editingProduct.number != undefined">
+                      <label for="number" class="form-label">數量:</label>
+                      <input
+                        type="text"
+                        id="number"
+                        class="form-control mb-2"
+                        v-model.number="editingProduct. number"
+                        placeholder="請輸入產品數量"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="category" class="form-label">分類:</label>
+                      <input
+                        type="text"
+                        id="category"
+                        class="form-control mb-2"
+                        v-model="editingProduct.category"
+                        placeholder="請輸入產品分類"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="editing_unit" class="form-label">單位:</label>
+                      <input
+                        type="text"
+                        id="editing_unit"
+                        class="form-control mb-2"
+                        v-model="editingProduct.unit"
+                        placeholder="請輸入產品單位"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="editing_origin_price" class="form-label"
+                        >原價:</label
+                      >
+                      <input
+                        type="text"
+                        id="editing_origin_price"
+                        class="form-control mb-2"
+                        v-model.number="editingProduct.origin_price"
+                        placeholder="請輸入產品原價"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="editing_price" class="form-label"
+                        >售價:</label
+                      >
+                      <input
+                        type="text"
+                        id="editing_price"
+                        class="form-control mb-2"
+                        v-model.number="editingProduct.price"
+                        placeholder="請輸入產品售價"
+                      />
+                    </div>
+                    <div>
+                      <label for="editing_description" class="form-label"
+                        >描述:</label
+                      >
+                      <textarea
+                        type="text"
+                        id="editing_description"
+                        class="form-control mb-2"
+                        v-model="editingProduct.description"
+                        placeholder="請輸入產品描述"
+                      ></textarea>
+                    </div>
+                    <label for="editing_content" class="form-label"
+                      >說明:</label
+                    >
+                    <div>
+                      <textarea
+                        type="text"
+                        id="editing_content"
+                        class="form-control mb-2"
+                        v-model="editingProduct.content"
+                        placeholder="請輸入產品說明"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <div class="form-check form-switch">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          role="switch"
+                          id="editing_is_enabled"
+                          @change="getEditingEnabled"
+                          :checked="editingProduct.is_enabled"
+                        />
+                        <label class="form-check-label" for="editing_is_enabled"
+                          >是否啟用</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                class="btn btn-success"
+                @click="editProduct(editingProduct.id)"
+                data-bs-dismiss="modal"
+              >
+                更新
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 訊息 Modal -->
+      <msg-modal :text="modalText" id="msgModal"></msg-modal>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
+      integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.2/axios.min.js"
+      integrity="sha512-QTnb9BQkG4fBYIt9JGvYmxPpd6TBeKp6lsUrtiVQsrJ9sb33Bn9s0wMQO9qVBFbPX3xHRAsBHvXlcsrnJjExjg=="
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="./backend.js"></script>
+  </body>
+</html>
