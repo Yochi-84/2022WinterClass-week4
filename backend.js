@@ -3,7 +3,7 @@ import msgModal from './msgModal.js';
 // import confirmModal from './confirmModal.js';
 const api_path = 'week3-backend';
 axios.defaults.baseURL = 'https://vue3-course-api.hexschool.io';
-let add_modal = null;
+let manage_modal = null;
 let msg_modal = null;
 // let confirm_modal = null;
 
@@ -11,13 +11,13 @@ const app = Vue.createApp({
   data() {
     return {
       status: true, // 取得資料的狀態，false 為取得失敗
-      page: {},
+      page: {}, // api 回傳的 page 資料
       products: [],
-      newProduct: {},
       imgMethod: "url", // 圖片取得方式
-      tempSrc: {}, //上傳圖片的檔案與預覽網址
+      tempSrc: {}, // 上傳圖片的檔案與預覽網址
+      isEditing: false, // 是新增還是編輯(預設新增)
       editingProduct: {},
-      msgText: '',
+      msgText: '', // msgModal 內文
       // confirmText: '',
     };
   },
@@ -35,11 +35,30 @@ const app = Vue.createApp({
         })
         .catch(() => (this.status = false));
     },
-    getEnabled(e) {
-      this.newProduct.is_enabled = e.target.checked ? 1 : 0;
-    },
     getEditingEnabled(e) {
       this.editingProduct.is_enabled = e.target.checked ? 1 : 0;
+    },
+    deleteProduct(id) {
+      if (confirm('確認刪除此產品嗎?')) {
+        axios
+          .delete(`/v2/api/${api_path}/admin/product/${id}`)
+          .then(() => this.getAllProducts())
+          .catch((err) => {
+            this.msgText = err.response.data.message;
+            msg_modal.show();
+          });
+      }
+    },
+    getProductInfo(id) {
+      this.editingProduct = { ...this.products[this.products.findIndex(item => item.id === id)] };
+    },
+    manageProduct(id) {
+      // 如果帶參數(id)就是編輯，沒有就是新增
+      if (!id) {
+        this.addProduct();
+      } else {
+        this.editProduct(id);
+      }
     },
     addProduct() {
       if (this.imgMethod !== 'url') {
@@ -55,15 +74,15 @@ const app = Vue.createApp({
           .then(res => {
             if (res.data.success) {
               url = res.data.imageUrl;
-              this.newProduct.imageUrl = url;
+              this.editingProduct.imageUrl = url;
               axios
                 .post(`/v2/api/${api_path}/admin/product`, {
                   data: this.newProduct,
                 })
                 .then(() => {
                   this.getAllProducts();
-                  this.newProduct = {};
-                  add_modal.hide();
+                  this.editingProduct = {};
+                  manage_modal.hide();
                 })
                 .catch(err => {
                   this.msgText = err.response.data.message;
@@ -77,39 +96,29 @@ const app = Vue.createApp({
       } else {
         axios
           .post(`/v2/api/${api_path}/admin/product`, {
-            data: this.newProduct,
+            data: this.editingProduct,
           })
           .then(() => {
             this.getAllProducts();
-            this.newProduct = {};
-            add_modal.hide();
+            this.editingProduct = {};
+            manage_modal.hide();
           })
           .catch((err) => {
             this.msgText = err.response.data.message;
             msg_modal.show();
           });
       }
-    },
-    deleteProduct(id) {
-      if (confirm('確認刪除此產品嗎?')) {
-        axios
-          .delete(`/v2/api/${api_path}/admin/product/${id}`)
-          .then(() => this.getAllProducts())
-          .catch((err) => {
-            this.msgText = err.response.data.message;
-            msg_modal.show();
-          });
-      }
-    },
-    getProductInfo(index) {
-      this.editingProduct = { ...this.products[index] };
     },
     editProduct(id) {
       axios
         .put(`/v2/api/${api_path}/admin/product/${id}`, {
           data: this.editingProduct,
         })
-        .then(() => this.getAllProducts())
+        .then(() => {
+          this.getAllProducts();
+          this.editingProduct = {};
+          manage_modal.hide(); 
+        })
         .catch((err) => {
           this.msgText = err.response.data.message;
           msg_modal.show();
@@ -144,7 +153,7 @@ const app = Vue.createApp({
       })
       .catch(() => (window.location.href = './index.html'));
 
-    add_modal = new bootstrap.Modal(document.getElementById('addModal'));
+    manage_modal = new bootstrap.Modal(document.getElementById('manageModal'));
     msg_modal = new bootstrap.Modal(document.getElementById('msgModal'));
     // confirm_modal = new bootstrap.Modal(document.getElementById('confirmModal'));
   }
