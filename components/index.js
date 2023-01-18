@@ -30,7 +30,7 @@ const app = Vue.createApp({
             //expires 設置有效時間
             document.cookie = `token = ${token};expires=${new Date(expired)}; path=/`;
             this.status = true;
-            window.location.href = '../backend.html';
+            window.location.href = './backend.html';
           })
           .catch((err) => {
             this.msgText = err.response.data.message;

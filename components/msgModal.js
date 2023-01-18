@@ -1,9 +1,4 @@
 export default {
-  data() {
-    return {
-
-    }
-  },
   props: ['text'],
   template: `
   <div class="modal fade" tabindex="-1">

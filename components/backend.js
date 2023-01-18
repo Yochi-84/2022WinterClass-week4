@@ -73,7 +73,7 @@ const app = Vue.createApp({
       .then(() => {
         return this.getAllProducts();
       })
-      .catch(() => (window.location.href = '../index.html'));
+      .catch(() => (window.location.href = './index.html'));
 
     msg_modal = new bootstrap.Modal(document.getElementById('msgModal'));
     // confirm_modal = new bootstrap.Modal(document.getElementById('confirmModal'));
