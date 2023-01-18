@@ -26,10 +26,11 @@ const app = Vue.createApp({
             password: this.password,
           })
           .then((res) => {
-            axios.defaults.headers.common['Authorization'] = res.data.token;
-            document.cookie = `token = ${res.data.token}`;
+            const { token, expired } = res.data;
+            //expires 設置有效時間
+            document.cookie = `token = ${token};expires=${new Date(expired)}; path=/`;
             this.status = true;
-            window.location.href = './backend.html';
+            window.location.href = '../backend.html';
           })
           .catch((err) => {
             this.msgText = err.response.data.message;

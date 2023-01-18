@@ -300,6 +300,7 @@
                           role="switch"
                           id="is_enabled"
                           @change="getEditingEnabled"
+                          :checked="editingProduct.is_enabled ? true: false"
                         />
                         <label class="form-check-label" for="is_enabled"
                           >是否啟用</label
@@ -357,6 +358,6 @@
       integrity="sha512-QTnb9BQkG4fBYIt9JGvYmxPpd6TBeKp6lsUrtiVQsrJ9sb33Bn9s0wMQO9qVBFbPX3xHRAsBHvXlcsrnJjExjg=="
       crossorigin="anonymous"
     ></script>
-    <script type="module" src="./backend.js"></script>
+    <script type="module" src="./components/backend.js"></script>
   </body>
 </html>

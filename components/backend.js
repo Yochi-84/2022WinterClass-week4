@@ -60,6 +60,10 @@ const app = Vue.createApp({
         this.editProduct(id);
       }
     },
+    initModal() {
+      this.imgMethod = 'url';
+      this.editingProduct = {};
+    },
     addProduct() {
       if (this.imgMethod !== 'url') {
         const formData = new FormData();
@@ -77,11 +81,11 @@ const app = Vue.createApp({
               this.editingProduct.imageUrl = url;
               axios
                 .post(`/v2/api/${api_path}/admin/product`, {
-                  data: this.newProduct,
+                  data: this.editingProduct,
                 })
                 .then(() => {
+                  this.initModal();
                   this.getAllProducts();
-                  this.editingProduct = {};
                   manage_modal.hide();
                 })
                 .catch(err => {
@@ -99,8 +103,8 @@ const app = Vue.createApp({
             data: this.editingProduct,
           })
           .then(() => {
+            this.initModal();
             this.getAllProducts();
-            this.editingProduct = {};
             manage_modal.hide();
           })
           .catch((err) => {
@@ -117,7 +121,7 @@ const app = Vue.createApp({
         .then(() => {
           this.getAllProducts();
           this.editingProduct = {};
-          manage_modal.hide(); 
+          manage_modal.hide();
         })
         .catch((err) => {
           this.msgText = err.response.data.message;
@@ -151,7 +155,7 @@ const app = Vue.createApp({
       .then(() => {
         return this.getAllProducts();
       })
-      .catch(() => (window.location.href = './index.html'));
+      .catch(() => (window.location.href = '../index.html'));
 
     manage_modal = new bootstrap.Modal(document.getElementById('manageModal'));
     msg_modal = new bootstrap.Modal(document.getElementById('msgModal'));
